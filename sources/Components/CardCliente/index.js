@@ -15,7 +15,7 @@ export default function CardCliente({data}) {
            </View>
            <View style={styles.areaBairro}>
                 <Text style={styles.txtTipoEndereco}> Data de Nascimento</Text>
-                <Text style={styles.txtBairro}> {Moment(data.dataNascimento).format('DD/MM/YYYY')} </Text>
+                <Text style={styles.txtBairro}> {data.dataNascimento} </Text>
            </View>
        </View>
    </View>
