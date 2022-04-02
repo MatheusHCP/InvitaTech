@@ -20,8 +20,8 @@ async function pesquisar(){
         setresultadoapi([]);
         const response = await api.get(`/api/Cliente?descricao=${txtPesquisar}`)
         setresultadoapi(response.data.resultado);
-        console.log(resultadoapi);
         setloading(false);
+        console.log(resultadoapi);
     }
     catch(error){
         alert(error)

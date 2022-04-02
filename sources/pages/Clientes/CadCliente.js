@@ -5,10 +5,12 @@ import { Picker } from '@react-native-picker/picker';
 import CardEnderecos from '../../Components/CardEnderecos';
 import api from '../../Services/api/ApiClientes';
 import ModalCadEndereco from '../../Components/ModalCadEndereco';
+import { StackActions, useNavigation } from '@react-navigation/native';
 
 
 export default function CadCliente() {
 
+  const navigation = useNavigation();
 
   const [modalVisible, setmodalVisible] = useState(false);
   const [nome, setnome] = useState('');
@@ -53,10 +55,11 @@ export default function CadCliente() {
       setPickersexo('');
       setdtnascimento('');
       setarrayEnderecos([]);
+      navigation.dispatch(StackActions.pop());
       
     })
     .catch(function (error) {
-      alert("Erro ao efetuar cadastro");
+      alert("Erro ao efetuar cadastro" + error);
     });
   }
   //#endregion
@@ -120,7 +123,7 @@ export default function CadCliente() {
         contentContainerStyle={{alignItems:'center'}}
         style={stlyes.scrollEnderecos}
         keyExtractor={item => item.id}
-        showsVerticalScrollIndicator={false} 
+        showsVerticalScrollIndicator={false}
         renderItem={({item}) => <CardEnderecos data={item} />}
         />
     </View>
