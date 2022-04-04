@@ -1,8 +1,10 @@
 import React, {useState} from "react";
-import {View, Text, TextInput ,TouchableOpacity, Modal, ScrollView, StyleSheet, Button} from 'react-native';
+import {View, Text, TextInput ,TouchableOpacity, Modal, ScrollView, StyleSheet, Button, Alert} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Picker } from "@react-native-picker/picker";
 import api from "../../Services/api/ApiClientes";
+import {TextInputMask} from 'react-native-masked-text'
+import ApiCEP from "../../Services/api/ApiCEP";
 
 
 export default function ModalCadEndereco(props){
@@ -49,13 +51,25 @@ export default function ModalCadEndereco(props){
         setUF('');
     }
 
+    async function buscaCEP(){
+        
+        const response = await ApiCEP.get(`${CEP}/json/`)
+        setCidade(response.data.localidade)
+        setUF(response.data.uf)
+        setlogradouro(response.data.logradouro)
+        setbairro(response.data.bairro)
+
+    }
 
     async function cadastrarEndereco(){
 
-        const response = await api.get('api/Endereco/MaxID')
-        setidEndereco(response.data.resultado.id + 1)    
-        console.log(idEndereco) 
-        
+    const response = await api.get('api/Endereco/MaxID')
+    setidEndereco(response.data.resultado.id + 1)
+
+    if(pickerTipoEndereco == '' || logradouro == '' || numero == '' || CEP == '' || Cidade == '' || UF == ''){
+        Alert.alert('Cadastro Inválido', 'Necessário preenchimentos dos campos obrigatório.');
+    }
+    else{
         if(props.id === 0){
             console.log('entrou no IF')
 
@@ -72,8 +86,8 @@ export default function ModalCadEndereco(props){
                 uf: UF
             };
             console.log(data);
-               props.salvarEndereco((oldTasks => [...oldTasks, data]))
-              
+                props.salvarEndereco((oldTasks => [...oldTasks, data]))
+                
             fechaModal();
 
         }else{
@@ -91,91 +105,92 @@ export default function ModalCadEndereco(props){
                 uf: UF
             };
             console.log(data);
-               props.salvarEndereco((oldTasks => [...oldTasks, data]))
-              
+                props.salvarEndereco((oldTasks => [...oldTasks, data]))
+                
             fechaModal();
+            }
         }
-
-
     }
 
     return(
-        <Modal transparent={true} animationType='slide' visible={props.modalVisible}>
-          <View style={styles.modalChamado} >
-            <TouchableOpacity style={styles.btnFecharModal} onPress={ fechaModal }>
-                <Ionicons name='close-outline' size={36} color="#000"/>
-            </TouchableOpacity>
-            <View style={styles.areaTitulo}>
-                <Text style={styles.txtTitulo}>Cadastro de Endereço</Text>
+    <Modal transparent={true} animationType='slide' visible={props.modalVisible}>
+        <View style={styles.modalChamado} >
+        <TouchableOpacity style={styles.btnFecharModal} onPress={ fechaModal }>
+            <Ionicons name='close-outline' size={36} color="#000"/>
+        </TouchableOpacity>
+        <View style={styles.areaTitulo}>
+            <Text style={styles.txtTitulo}>Cadastro de Endereço</Text>
+        </View>
+        <View>
+            <Picker
+            selectedValue={pickerTipoEndereco}
+            onValueChange={PickerTipoEnd}
+            >
+                {pickerTipoEnd}
+            </Picker>
+        </View>
+        <ScrollView style={styles.areaInputModal} contentContainerStyle={{alignItems:"center"}}>
+            <Text style={styles.txtCEP}>CEP</Text>
+                <TextInputMask
+                type='zip-code'
+                placeholder="Obrigatório"
+                style={styles.inputTEXT}
+                value={CEP}
+                onChangeText={(texto) => setCEP(texto)}
+                onEndEditing={buscaCEP}
+                />
+            <Text style={styles.txtCidade}>Cidade</Text>
+                <TextInput
+                placeholder="Obrigatório"
+                style={styles.inputTEXT}
+                value={Cidade}
+                onChangeText={(texto) => setCidade(texto)}
+                />
+            <Text style={styles.txtUF}>UF</Text>
+                <TextInput
+                placeholder="Obrigatório"
+                style={styles.inputTEXT}
+                value={UF}
+                onChangeText={(texto) => setUF(texto)}
+                />
+            <Text style={styles.txtLogradouro}>Logradouro</Text>
+                <TextInput
+                placeholder="Obrigatório"
+                style={styles.inputTEXT}
+                value={logradouro}
+                onChangeText={(texto) => setlogradouro(texto)}
+                />
+            <Text style={styles.txtNumero}>Número</Text>
+                <TextInput
+                placeholder="Obrigatório"
+                style={styles.inputTEXT}
+                value={numero}
+                onChangeText={(texto) => setnumero(texto)}
+                />
+            <Text style={styles.txtBairro}>Bairro</Text>
+                <TextInput
+                placeholder="Opcional"
+                style={styles.inputTEXT}
+                value={bairro}
+                onChangeText={(texto) => setbairro(texto)}
+                />
+            <Text style={styles.txtComplemento}>Complemento</Text>
+                <TextInput
+                placeholder="Opcional"
+                style={styles.inputTEXT}
+                value={Complemento}
+                onChangeText={(texto) => setcomplemento(texto)}
+                />
+            <View style={styles.btnSalvar}>
+                <Button
+                title="Salvar Endereço"
+                onPress={cadastrarEndereco}
+                />
             </View>
-            <View>
-                <Picker
-                selectedValue={pickerTipoEndereco}
-                onValueChange={PickerTipoEnd}
-                >
-                    {pickerTipoEnd}
-                </Picker>
-            </View>
-            <ScrollView style={styles.areaInputModal} contentContainerStyle={{alignItems:"center"}}>
-                <Text style={styles.txtLogradouro}>Logradouro</Text>
-                    <TextInput
-                    placeholder="Ex: Rua Fulano de Tal"
-                    style={styles.inputTEXT}
-                    value={logradouro}
-                    onChangeText={(texto) => setlogradouro(texto)}
-                    />
-                <Text style={styles.txtNumero}>Número</Text>
-                    <TextInput
-                    placeholder="545"
-                    style={styles.inputTEXT}
-                    value={numero}
-                    onChangeText={(texto) => setnumero(texto)}
-                    />
-                <Text style={styles.txtBairro}>Bairro</Text>
-                    <TextInput
-                    placeholder="Ex: Centro"
-                    style={styles.inputTEXT}
-                    value={bairro}
-                    onChangeText={(texto) => setbairro(texto)}
-                    />
-                <Text style={styles.txtComplemento}>Complemento</Text>
-                    <TextInput
-                    placeholder="Ex: Residencia"
-                    style={styles.inputTEXT}
-                    value={Complemento}
-                    onChangeText={(texto) => setcomplemento(texto)}
-                    />
-                <Text style={styles.txtCEP}>CEP</Text>
-                    <TextInput
-                    placeholder="00000-000"
-                    style={styles.inputTEXT}
-                    value={CEP}
-                    onChangeText={(texto) => setCEP(texto)}
-                    />
-                <Text style={styles.txtCidade}>Cidade</Text>
-                    <TextInput
-                    placeholder="Selecione sua Cidade"
-                    style={styles.inputTEXT}
-                    value={Cidade}
-                    onChangeText={(texto) => setCidade(texto)}
-                    />
-                <Text style={styles.txtUF}>UF</Text>
-                    <TextInput
-                    placeholder="SP"
-                    style={styles.inputTEXT}
-                    value={UF}
-                    onChangeText={(texto) => setUF(texto)}
-                    />
-                <View style={styles.btnSalvar}>
-                    <Button
-                    title="Salvar Endereço"
-                    onPress={cadastrarEndereco}
-                    />
-                </View>
-            </ScrollView>
-          </View>
-        </Modal>
-    )
+        </ScrollView>
+        </View>
+    </Modal>
+)
 }
 
 const styles = StyleSheet.create({

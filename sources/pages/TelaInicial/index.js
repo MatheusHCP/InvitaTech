@@ -81,7 +81,7 @@ async function pesquisar(){
 const styles = StyleSheet.create({
     container:{
         flex: 1,
-        backgroundColor: "#2d0f00"
+        backgroundColor: "#837575"
     },
     areaPesquisa:{
         flexDirection: 'row',

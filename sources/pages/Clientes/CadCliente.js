@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import { View, Text, StyleSheet, TextInput, Button, Modal, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button, FlatList, Alert } from 'react-native';
 import {TextInputMask} from 'react-native-masked-text'
 import { Picker } from '@react-native-picker/picker';
 import CardEnderecos from '../../Components/CardEnderecos';
@@ -38,51 +38,55 @@ export default function CadCliente(props) {
   }
   //#endregion
 
-
   async function FinalizarCadastro(){
-    console.log(id)
-    if(id == 0){
-      console.log('ENTROU NO if DO FINALZIAR CADASTRO')
-      await api.post('/api/cliente', {
-        nome: nome,
-        dataNascimento: dtnascimento,
-        sexo: Pickersexo,
-        clienteEnderecos: arrayEnderecos
-      })
-      .then(function (response) {
-        alert("Cadastro efetuado com sucesso!");
-        setnome('');
-        setPickersexo('');
-        setdtnascimento('');
-        setarrayEnderecos([]);
-        navigation.dispatch(StackActions.pop());
-        
-      })
-      .catch(function (error) {
-        alert("Erro ao efetuar cadastro" + error);
-      });
 
-    }else
-    {
-      console.log('ENTROU NO else DO FINALZIAR CADASTRO')
-      await api.put('/api/cliente',{
-        id: props.route.params.id,
-        nome: nome,
-        dataNascimento: dtnascimento,
-        sexo: Pickersexo,
-        clienteEnderecos: arrayEnderecos
-      })
-      .then(function (response){
-        alert('Cadastro alterado com sucesso!');
-        setnome('');
-        setPickersexo('');
-        setdtnascimento('');
-        setarrayEnderecos([]);
-        navigation.dispatch(StackActions.pop());
-      })
-      .catch(function (error){
-        alert(error);
-      })
+    if(Pickersexo == undefined || dtnascimento == undefined || nome == undefined || Pickersexo == '' || dtnascimento == '' || nome == ''){
+      Alert.alert('Cadastro inválido','Necessário preenchimento de todos os campos do cadastro.');
+    }
+    else{
+      if(id == 0){
+        console.log('ENTROU CADASTRAR CLIENTE')
+        await api.post('/api/cliente', {
+          nome: nome,
+          dataNascimento: dtnascimento,
+          sexo: Pickersexo,
+          clienteEnderecos: arrayEnderecos
+        })
+        .then(function (response) {
+          alert("Cadastro efetuado com sucesso!");
+          setnome('');
+          setPickersexo('');
+          setdtnascimento('');
+          setarrayEnderecos([]);
+          navigation.dispatch(StackActions.pop());
+          
+        })
+        .catch(function (error) {
+          alert("Erro ao efetuar cadastro" + error);
+        });
+  
+      }else
+      {
+        console.log('ENTROU NO ALTERAR CLIENTE')
+        await api.put('/api/cliente',{
+          id: props.route.params.id,
+          nome: nome,
+          dataNascimento: dtnascimento,
+          sexo: Pickersexo,
+          clienteEnderecos: arrayEnderecos
+        })
+        .then(function (response){
+          alert('Cadastro alterado com sucesso!');
+          setnome('');
+          setPickersexo('');
+          setdtnascimento('');
+          setarrayEnderecos([]);
+          navigation.dispatch(StackActions.pop());
+        })
+        .catch(function (error){
+          alert(error);
+        })
+      }
     }
   }
 
@@ -123,7 +127,7 @@ export default function CadCliente(props) {
 
 
  return (
-    <View style={stlyes.container}>
+    <View style={styles.container}>
       <ModalCadEndereco
       modalVisible={modalVisible}
       fechar={ () => setmodalVisible(false)} // MODAL DINAMICO PREENCHER PROPRIEDADES
@@ -131,51 +135,51 @@ export default function CadCliente(props) {
       data={arrayEnderecos}
       id={`${id}`}
     />
-      <View style={stlyes.areaInput} >
-        <Text style={stlyes.txtInput}>Nome</Text>
+      <View style={styles.areaInput} >
+        <Text style={styles.txtInput}>Nome</Text>
         <TextInput
-        style={stlyes.inputCadastro}
+        style={styles.inputCadastro}
         value={nome}
         onChangeText={(texto) => setnome(texto)}
         />
-        <Text style={stlyes.txtInput}>Sexo</Text>
-        <View style={stlyes.areaPicker} >
+        <Text style={styles.txtInput}>Sexo</Text>
+        <View style={styles.areaPicker} >
         <Picker
-          style={stlyes.inputCadastro}
+          style={styles.inputCadastro}
           selectedValue={Pickersexo}
           onValueChange={pickergenero}>
             {sexoPicker}
           </Picker>
         </View>
-        <Text style={stlyes.txtInput}>Data de Nascimento</Text>
+        <Text style={styles.txtInput}>Data de Nascimento</Text>
           <TextInputMask
           type={'datetime'}
           options={{
             format: 'DD/MM/YYYY'
           }}
-          style={stlyes.inputCadastro}
+          style={styles.inputCadastro}
           value={dtnascimento}
           onChangeText={ (texto) => setdtnascimento(texto)}
           maxLength={10}
           />
-        <View style={stlyes.btn}>
+        <View style={styles.btn}>
           <Button
           title='Salvar Cadastro'
           onPress={FinalizarCadastro}
           />
         </View>
-        <View style={stlyes.btn}>
+        <View style={styles.btn}>
           <Button
           title='Adicionar novo endereço'
           onPress={novoCadastro}
           />
         </View>
       </View>
-
+      <Text style={styles.txtListaEnderecos}>Lista de Endereços</Text>
       <FlatList 
         data={arrayEnderecos}
         contentContainerStyle={{alignItems:'center'}}
-        style={stlyes.scrollEnderecos}
+        style={styles.scrollEnderecos}
         keyExtractor={item => item.id}
         showsVerticalScrollIndicator={false}
         renderItem={({item}) => <CardEnderecos data={item} atualizaEndereco={atualizaEnderecos} alterardados={alterarEndereco} />}
@@ -184,10 +188,10 @@ export default function CadCliente(props) {
   );
 }
 
-const stlyes = StyleSheet.create({
+const styles = StyleSheet.create({
   container:{
     flex: 1,
-    backgroundColor: "#2d0f00",
+    backgroundColor: "#837575",
     justifyContent: 'center',
     alignItems: 'center'
   },
@@ -214,5 +218,10 @@ const stlyes = StyleSheet.create({
     flex: 2,
     marginTop: "4%"
 },
+txtListaEnderecos:{
+  color: '#fff',
+  fontSize: 20,
+  marginTop: "2%"
+}
 
 })

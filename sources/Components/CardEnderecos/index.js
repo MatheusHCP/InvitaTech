@@ -33,15 +33,15 @@ async function excluirEndereco(){
            </View>
            <View style={styles.areaBairro}>
                 <Text style={styles.txtTipoEndereco}> Bairro</Text>
-                <Text style={styles.txtBairro}> {props.data.bairro} </Text>
+                <Text style={styles.txtBairro}> {props.data.bairro === '' ? 'Não informado' : props.data.bairro} </Text>
            </View>
        </View>
        <View style={styles.area3}> 
            <View>
                 <Text style={styles.txtTipoNumero}> Complemento </Text>
-                <Text style={styles.txtNumero}> {props.data.complemento} </Text>
+                <Text style={styles.txtNumero}> {props.data.complemento === '' ? 'Não informado' : props.data.complemento} </Text>
            </View>
-           <View style={styles.areaBairro}>
+           <View style={styles.areaCompCEP}>
                 <Text style={styles.txtTipoEndereco}> CEP</Text>
                 <Text style={styles.txtBairro}> {props.data.cep} </Text>
            </View>
@@ -59,14 +59,10 @@ async function excluirEndereco(){
                 <Text style={styles.txtUF}> UF</Text>
                 <Text style={styles.txtresultUF}> {props.data.uf} </Text>
            </View>
-       </View>
-       { props.data.idCliente !== 0 ?       
+       </View>     
         <TouchableOpacity style={styles.btnExcluirEndereco} onPress={excluirEndereco} >
             <Ionicons name='trash' size={26} color="#000"/>
         </TouchableOpacity> 
-        : 
-        <Text>Não é possível excuir</Text>
-       }
        </TouchableOpacity>
    </View>
   );
@@ -128,6 +124,10 @@ const styles = StyleSheet.create({
     areaBairro:{
         marginLeft: "30%",
         marginTop: "-13%"
+    },
+    areaCompCEP:{
+        marginLeft: "33%",
+        marginTop: "-12.5%"
     },
     txtresultCEP:{
         color: "#000",
