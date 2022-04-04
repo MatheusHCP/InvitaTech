@@ -2,14 +2,16 @@ import React, {useState} from "react";
 import {View, Text, TextInput ,TouchableOpacity, Modal, ScrollView, StyleSheet, Button} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Picker } from "@react-native-picker/picker";
+import api from "../../Services/api/ApiClientes";
 
 
 export default function ModalCadEndereco(props){
 
+    const [idEndereco, setidEndereco] = useState();
     const [pickerTipoEndereco, setpickerTipoEndereco] = useState('');
     const [logradouro, setlogradouro] = useState('');
     const [numero, setnumero] = useState('');
-    const [bairro, setbairro] = useState('');
+    const [bairro, setbairro] = useState();
     const [Complemento, setcomplemento] = useState('');
     const [CEP, setCEP] = useState('');
     const [Cidade, setCidade] = useState('');
@@ -47,31 +49,54 @@ export default function ModalCadEndereco(props){
         setUF('');
     }
 
-    function cadastrarEndereco(){
+
+    async function cadastrarEndereco(){
+
+        const response = await api.get('api/Endereco/MaxID')
+        setidEndereco(response.data.resultado.id + 1)    
+        console.log(idEndereco) 
         
-        const data = {
-            id: props.data.length,
-            tipoEndereco: pickerTipoEndereco,
-            cep: CEP,
-            logradouro: logradouro,
-            numero: numero,
-            complemento: Complemento,
-            bairro: bairro,
-            cidade: Cidade,
-            uf: UF
-        };
-        console.log(data);
-           props.salvarEndereco((oldTasks => [...oldTasks, data]))
-          
-        props.fechar()
-        setpickerTipoEndereco('');
-        setlogradouro('');
-        setnumero('');
-        setbairro('');
-        setcomplemento('');
-        setCEP('');
-        setCidade('');
-        setUF('');
+        if(props.id === 0){
+            console.log('entrou no IF')
+
+            const data = {
+                id: idEndereco,
+                idCliente: 0,
+                tipoEndereco: pickerTipoEndereco,
+                cep: CEP,
+                logradouro: logradouro,
+                numero: numero,
+                complemento: Complemento,
+                bairro: bairro,
+                cidade: Cidade,
+                uf: UF
+            };
+            console.log(data);
+               props.salvarEndereco((oldTasks => [...oldTasks, data]))
+              
+            fechaModal();
+
+        }else{
+            console.log('entrou no else')
+            const data = {
+                id: 0,
+                idCliente: props.id,
+                tipoEndereco: pickerTipoEndereco,
+                cep: CEP,
+                logradouro: logradouro,
+                numero: numero,
+                complemento: Complemento,
+                bairro: bairro,
+                cidade: Cidade,
+                uf: UF
+            };
+            console.log(data);
+               props.salvarEndereco((oldTasks => [...oldTasks, data]))
+              
+            fechaModal();
+        }
+
+
     }
 
     return(

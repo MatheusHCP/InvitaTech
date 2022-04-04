@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { View, Text, StyleSheet, TextInput, Button, Modal, TouchableOpacity, FlatList } from 'react-native';
 import {TextInputMask} from 'react-native-masked-text'
 import { Picker } from '@react-native-picker/picker';
@@ -8,17 +8,16 @@ import ModalCadEndereco from '../../Components/ModalCadEndereco';
 import { StackActions, useNavigation } from '@react-navigation/native';
 
 
-export default function CadCliente() {
+export default function CadCliente(props) {
 
   const navigation = useNavigation();
 
   const [modalVisible, setmodalVisible] = useState(false);
   const [nome, setnome] = useState('');
+  const [id, setid] = useState(props.route.params.id)
   const [Pickersexo, setPickersexo] = useState('');
   const [dtnascimento, setdtnascimento ] = useState('');
   const [arrayEnderecos, setarrayEnderecos] = useState([]);
-
-      
   const [carregaGenero, setcarregaGenero] = useState([ // Carregamento Dinamico dos PICKERS
   {key: '', nome: 'Selecione seu gênero'},
   {key: 'M', nome: 'Masculino' },
@@ -39,35 +38,89 @@ export default function CadCliente() {
   }
   //#endregion
 
-  //#region Finalizar Cadastro
-  async function FinalizarCadastro(){
 
-    console.log(dtnascimento);
-    await api.post('/api/cliente', {
-      nome: nome,
-      dataNascimento: dtnascimento,
-      sexo: Pickersexo,
-      clienteEnderecos: arrayEnderecos
-    })
-    .then(function (response) {
-      alert("Cadastro efetuado com sucesso!");
-      setnome('');
-      setPickersexo('');
-      setdtnascimento('');
-      setarrayEnderecos([]);
-      navigation.dispatch(StackActions.pop());
-      
-    })
-    .catch(function (error) {
-      alert("Erro ao efetuar cadastro" + error);
-    });
+  async function FinalizarCadastro(){
+    console.log(id)
+    if(id == 0){
+      console.log('ENTROU NO if DO FINALZIAR CADASTRO')
+      await api.post('/api/cliente', {
+        nome: nome,
+        dataNascimento: dtnascimento,
+        sexo: Pickersexo,
+        clienteEnderecos: arrayEnderecos
+      })
+      .then(function (response) {
+        alert("Cadastro efetuado com sucesso!");
+        setnome('');
+        setPickersexo('');
+        setdtnascimento('');
+        setarrayEnderecos([]);
+        navigation.dispatch(StackActions.pop());
+        
+      })
+      .catch(function (error) {
+        alert("Erro ao efetuar cadastro" + error);
+      });
+
+    }else
+    {
+      console.log('ENTROU NO else DO FINALZIAR CADASTRO')
+      await api.put('/api/cliente',{
+        id: props.route.params.id,
+        nome: nome,
+        dataNascimento: dtnascimento,
+        sexo: Pickersexo,
+        clienteEnderecos: arrayEnderecos
+      })
+      .then(function (response){
+        alert('Cadastro alterado com sucesso!');
+        setnome('');
+        setPickersexo('');
+        setdtnascimento('');
+        setarrayEnderecos([]);
+        navigation.dispatch(StackActions.pop());
+      })
+      .catch(function (error){
+        alert(error);
+      })
+    }
   }
-  //#endregion
 
   function novoCadastro(){
     setmodalVisible(true);
+  }
+
+  function alterarEndereco(){
+    setmodalVisible(true)
 
   }
+
+  async function alterarCadastro(){
+    setnome('');
+    setPickersexo('');
+    setdtnascimento('');
+    setnome(props.route.params.nome);
+    setPickersexo(props.route.params.sexo);
+    setdtnascimento(props.route.params.dtNascimento);
+    const response = await api.get(`/api/Endereco?idCliente=${props.route.params.id}`)
+    setarrayEnderecos(response.data.resultado)
+  }
+
+  async function atualizaEnderecos(){
+    setarrayEnderecos([]);
+    const response = await api.get(`/api/Endereco?idCliente=${props.route.params.id}`)
+    setarrayEnderecos(response.data.resultado)
+  }
+
+  useEffect( () => {
+    
+  if(props.route.params.id !== 0){ // Editar Cadastro
+    alterarCadastro();
+  }
+
+
+  }, [props.route.params.id] )
+
 
  return (
     <View style={stlyes.container}>
@@ -76,6 +129,7 @@ export default function CadCliente() {
       fechar={ () => setmodalVisible(false)} // MODAL DINAMICO PREENCHER PROPRIEDADES
       salvarEndereco={ (data) => setarrayEnderecos(data) }
       data={arrayEnderecos}
+      id={`${id}`}
     />
       <View style={stlyes.areaInput} >
         <Text style={stlyes.txtInput}>Nome</Text>
@@ -124,7 +178,7 @@ export default function CadCliente() {
         style={stlyes.scrollEnderecos}
         keyExtractor={item => item.id}
         showsVerticalScrollIndicator={false}
-        renderItem={({item}) => <CardEnderecos data={item} />}
+        renderItem={({item}) => <CardEnderecos data={item} atualizaEndereco={atualizaEnderecos} alterardados={alterarEndereco} />}
         />
     </View>
   );

@@ -8,10 +8,9 @@ import api from '../../Services/api/ApiClientes';
 export default function TelaInicial() {
 
     const [resultadoapi, setresultadoapi] = useState([]);
-
+    const [idNovoCadastro, setidNovoCadastro] = useState(0);
     const [txtPesquisar, settxtPesquisar] = useState('');
     const [loading, setloading] = useState(false);
-    const [boolPesquisa, setboolPesquisa] = useState(false);
     const navigation = useNavigation();
 
 async function pesquisar(){
@@ -28,6 +27,8 @@ async function pesquisar(){
         setloading(false);
     }
 }
+
+
 
  return (
    <View style={styles.container} > 
@@ -49,7 +50,7 @@ async function pesquisar(){
         <View style={styles.areabtnCadastrar} >
             <Button
             title='Cadastrar novo cliente'
-            onPress={() => {navigation.navigate('CadastroCliente')}}
+            onPress={() => {navigation.navigate('CadastroCliente', {id: `${idNovoCadastro}`})}}
             />
         </View>
 
@@ -59,7 +60,13 @@ async function pesquisar(){
         style={styles.scrollClientes}
         keyExtractor={item => item.id}
         showsVerticalScrollIndicator={false} 
-        renderItem={({item}) => <CardCliente data={item}/>}
+        renderItem={({item}) => 
+        <CardCliente 
+            data={item}
+            alterarCliente={() => navigation.navigate('CadastroCliente', {id: `${item.id}`, nome: `${item.nome}`, sexo: `${item.sexo}`, dtNascimento: `${item.dataNascimento}` })}
+            atualizacliente={pesquisar}
+            idCliente={`${item.id}`}
+        />}
         refreshControl={
             <RefreshControl
             refreshing={loading}
